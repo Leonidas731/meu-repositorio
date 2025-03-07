@@ -1,0 +1,109 @@
+// Variáveis globais
+let score = 0;
+let difficulty = 1; // Começamos com dificuldade 1 (fácil)
+let timer = 10; // Tempo inicial de 10 segundos
+let interval;
+let currentAnswer;
+
+// Função para gerar uma pergunta
+function generateQuestion() {
+    const num1 = Math.floor(Math.random() * (10 * difficulty)); // Número aleatório baseado na dificuldade
+    const num2 = Math.floor(Math.random() * (10 * difficulty));
+
+    // Escolher aleatoriamente o tipo de operação (adição, subtração ou multiplicação)
+    const operations = ['+', '-', '*'];
+    const operation = operations[Math.floor(Math.random() * operations.length)];
+
+    let questionText = `${num1} ${operation} ${num2}`;
+    let correctAnswer;
+
+    switch (operation) {
+        case '+':
+            correctAnswer = num1 + num2;
+            break;
+        case '-':
+            correctAnswer = num1 - num2;
+            break;
+        case '*':
+            correctAnswer = num1 * num2;
+            break;
+    }
+
+    currentAnswer = correctAnswer;
+    document.getElementById("question").innerText = questionText;
+}
+
+// Função para iniciar o cronômetro
+function startTimer() {
+    timer = 10;
+    document.getElementById("timer").innerText = timer;
+
+    interval = setInterval(() => {
+        timer--;
+        document.getElementById("timer").innerText = timer;
+
+        if (timer === 0) {
+            clearInterval(interval);
+            provideFeedback(false);
+        }
+    }, 1000);
+}
+
+// Função para verificar a resposta
+function checkAnswer() {
+    const userAnswer = parseInt(document.getElementById("answer").value);
+
+    if (userAnswer === currentAnswer) {
+        score++;
+        difficulty++;
+        provideFeedback(true);
+    } else {
+        provideFeedback(false);
+    }
+}
+
+// Função para fornecer feedback visual e sonoro
+function provideFeedback(correct) {
+    if (correct) {
+        document.getElementById("feedback").innerText = "Resposta Correta!";
+        document.getElementById("feedback").style.color = "green";
+        playSound('correct');
+    } else {
+        document.getElementById("feedback").innerText = "Resposta Errada!";
+        document.getElementById("feedback").style.color = "red";
+        playSound('wrong');
+    }
+
+    setTimeout(() => {
+        document.getElementById("feedback").innerText = "";
+        document.getElementById("answer").value = '';
+        generateQuestion();
+        startTimer();
+    }, 1500);
+}
+
+// Função para tocar som (feedback)
+function playSound(type) {
+    const audio = new Audio();
+    if (type === 'correct') {
+        audio.src = 'correct.mp3'; // Som para resposta correta
+    } else {
+        audio.src = 'wrong.mp3'; // Som para resposta errada
+    }
+    audio.play();
+}
+
+// Função para iniciar o jogo
+function startGame() {
+    score = 0;
+    difficulty = 1;
+    document.getElementById("score-count").innerText = score;
+    generateQuestion();
+    startTimer();
+}
+
+// Adicionando evento ao botão de resposta
+document.getElementById("submit-answer").addEventListener("click", checkAnswer);
+
+// Começar o jogo assim que a página carregar
+window.onload = startGame;
